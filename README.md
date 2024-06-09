@@ -37,5 +37,5 @@ or average users can write plugins, macros and scripts in Rust regardless of whi
 and that the Rust API will always be up-to-date with the official release. **Each release version will be the same 
 as its corresponding ReaScript version, e.g. ReaScript v0.1.0 -> reascript.rs v0.1.0**
 
-Our hope by doing this, is for Rust to be official adopted by the [ReaScript Supported Languages](https://www.cockos.com/reaper/sdk/reascript/reascript.php).
+Our hope by doing this, is for Rust to be officially adopted by the [ReaScript Supported Languages](https://www.cockos.com/reaper/sdk/reascript/reascript.php).
 
