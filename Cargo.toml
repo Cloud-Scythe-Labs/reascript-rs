@@ -1,0 +1,11 @@
+[package]
+name = "reascript"
+version = "0.1.0"
+authors = ["Cloud Scythe Labs <cloudscythelabs@gmail.com>"]
+edition = "2024"
+publish = false
+
+[dependencies]
+chrono = { version = "0.4", default-features = false, features = ["serde"] }
+filetime = "0.2"
+reaper-medium = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
