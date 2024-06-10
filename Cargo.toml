@@ -1,7 +1,11 @@
-[package]
+[workspace.package]
 name = "reascript-rs"
 version = "0.0.0"
 edition = "2021"
 
-[dependencies]
-reaper-low = "0.1.0"
+[workspace]
+resolver = "2"
+members = [
+  "meta/gen",
+  "meta/proc"
+]

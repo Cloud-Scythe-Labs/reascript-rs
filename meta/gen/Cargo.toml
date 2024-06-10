@@ -1,0 +1,8 @@
+[package]
+name = "reascript-gen"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+reaper-low = "0.1.0"
+reascript-proc = { path = "../proc" }

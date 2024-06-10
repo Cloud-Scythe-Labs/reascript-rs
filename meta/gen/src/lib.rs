@@ -16,12 +16,32 @@ macro_rules! wrap_bindgen {
 }
 
 #[cfg(test)]
-mod tests {
+mod gen_macro_tests {
     use crate::Reaper;
     use std::ffi;
 
     #[test]
     fn test_wrap_bindgen() {
         wrap_bindgen!(Reaper, ShowConsoleMsg, (msg: *const ffi::c_char));
+    }
+}
+
+#[cfg(test)]
+mod proc_macro_tests {
+    use reascript_proc::wrap_bindgen;
+
+    pub struct Inner;
+
+    #[wrap_bindgen]
+    impl Inner {
+        pub unsafe fn is_true(&self) -> bool {
+            true
+        }
+    }
+
+    #[test]
+    fn test_wrap_bindgen() {
+        let reaper = REAPER(Inner);
+        assert!(reaper.is_true());
     }
 }

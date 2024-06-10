@@ -1,0 +1,13 @@
+[package]
+name = "reascript-proc"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+thiserror = "1"
+
+[lib]
+proc-macro = true
