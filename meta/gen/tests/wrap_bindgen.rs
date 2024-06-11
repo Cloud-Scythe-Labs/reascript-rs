@@ -20,7 +20,7 @@ impl Inner {
 struct Outer(Inner);
 
 #[test]
-fn test_wrap_bindgen() {
+fn test_gen_wrap_bindgen() {
     wrap_bindgen!(Outer, no_args_with_return, (), bool);
     wrap_bindgen!(Outer, with_args, (arg1: bool, arg2: u32), (bool, u32));
     wrap_bindgen!(Outer, unit, (), ());

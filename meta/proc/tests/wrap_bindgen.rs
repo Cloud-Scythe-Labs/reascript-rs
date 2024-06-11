@@ -18,7 +18,7 @@ impl Inner {
 }
 
 #[test]
-fn test_wrap_bindgen() {
+fn test_proc_wrap_bindgen() {
     let reaper = REAPER(Inner);
     assert!(reaper.no_args_with_return());
     assert_eq!(reaper.unit(), ());

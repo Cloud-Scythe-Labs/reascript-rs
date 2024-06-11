@@ -19,9 +19,8 @@ const _WRAP_EXCLUDE_IDENT: &str = "wrap_exclude";
 /// Intended for bindgen `impl` blocks.
 ///
 /// Takes the entire `impl` blocks methods and generates those same methods for a
-/// new wrapper type. This is useful because it removes the need to constantly use
-/// the `unsafe` keyword for Reaper methods. It also an important piece of the
-/// puzzle that gets us closer to a fully automated, self releasing crate.
+/// new wrapper type. Useful for generating the inital wrapper type, and auto
+/// implementing methods that are otherwise tedious to implement by hand.
 #[proc_macro_attribute]
 pub fn wrap_bindgen(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let impl_block = parse_macro_input!(item as ItemImpl);
