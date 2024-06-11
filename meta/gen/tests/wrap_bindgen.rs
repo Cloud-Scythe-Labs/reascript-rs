@@ -26,7 +26,7 @@ fn test_wrap_bindgen() {
     wrap_bindgen!(Outer, unit, (), ());
 
     let outer = Outer(Inner);
-    assert!(outer.is_true());
+    assert!(outer.no_args_with_return());
     assert_eq!(outer.with_args(true, 0), (true, 0));
     assert_eq!(outer.unit(), ());
 }
