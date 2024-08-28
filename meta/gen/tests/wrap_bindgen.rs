@@ -1,4 +1,5 @@
 #![cfg(test)]
+#![allow(clippy::unit_cmp)]
 
 use reascript_gen::wrap_bindgen;
 
@@ -6,6 +7,7 @@ struct Inner;
 
 #[allow(dead_code)]
 impl Inner {
+    #[allow(clippy::unused_unit)]
     pub unsafe fn unit(&self) {
         ()
     }

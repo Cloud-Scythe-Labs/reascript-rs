@@ -9,3 +9,6 @@ members = [
   "meta/gen",
   "meta/proc"
 ]
+
+[workspace.metadata.crane]
+name = "reascript-rs"
