@@ -30,10 +30,10 @@ allowing you to write your own higher level APIs as you see fit.
 Firstly, a special thanks to @helgoboss and other contributors to the `reaper-rs` project, which is the 
 inspiration for `reascript-rs`.
 
-`reascript-rs` aims to be backwards compatible with all previous versions of the ReaScript API.
-To achieve this we re-create each release of the [open source C/C++ GitHub mirror](https://github.com/justinfrankel/WDL), 
-made available by Cuckos, and auto-generate releases as new versions become available. This means that developers
-or average users can write plugins, macros and scripts in Rust regardless of which version of REAPER they prefer, 
+`reascript-rs` aims to be forwards compatible from its initial release, and if requested we may also include specific API versions of previous releases.
+To achieve this we create each release of the [open source C/C++ GitHub mirror](https://github.com/justinfrankel/WDL), 
+made available by Cuckos, auto-generating releases as new versions become available. This means that developers
+or average users can write plugins, macros and scripts in Rust so long as the REAPER version matches the ReaScript version, 
 and that the Rust API will always be up-to-date with the official release. **Each release version will be the same 
 as its corresponding ReaScript version, e.g. ReaScript v0.1.0 -> reascript.rs v0.1.0**
 
