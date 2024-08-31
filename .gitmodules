@@ -1,3 +1,6 @@
 [submodule "WDL"]
 	path = WDL
 	url = https://github.com/justinfrankel/WDL.git
+[submodule "reaper-sdk"]
+	path = reaper-sdk
+	url = https://github.com/justinfrankel/reaper-sdk.git
