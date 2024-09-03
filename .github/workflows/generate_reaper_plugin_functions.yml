@@ -82,7 +82,7 @@ jobs:
           file_tag=${latest_version%%.*} # retain only the major version
           reap_tag=${latest_version//./} # remove the '.'
           reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
-          wget "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
+          curl -s -L -o "$reap_tar" "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
           echo "finished downloading reaper tarball"
           tar -xf $reap_tar
           echo "finished extracting reaper from tarball"
