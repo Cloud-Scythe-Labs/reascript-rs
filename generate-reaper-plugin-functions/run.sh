@@ -14,12 +14,24 @@ function handle_save_dialog_box() {
     xdotool key Tab Tab Tab
     xdotool type "$1"
     xdotool key Return Return
+
+    # Accept overwrite of existing header file
+    sleep 1
+    xdotool key Return
 }
 
-# TODO: Check first arg is a path that exists
-# ~/Code/CloudScytheLabs/reaper-header-generator
+if [ -z "$1" ]; then
+    echo "Expected one argument which should be a path to a directory to save the generated header file."
+    exit 1
+fi
+
 SAVE_DIRECTORY=$1
-reaper ./generate_reaper_plugin_functions.lua &
-sleep 5
-handle_save_dialog_box $SAVE_DIRECTORY
-# TODO: Exit Reaper once complete
+if [ -e "$SAVE_DIRECTORY" ]; then
+    reaper ./generate_reaper_plugin_functions.lua &
+    sleep 5
+    handle_save_dialog_box $SAVE_DIRECTORY
+else
+    echo "'$SAVE_DIRECTORY' does not exist, please provide a valid path to a directory."
+    exit 1
+fi
+# TODO: Exit Reaper when finished
