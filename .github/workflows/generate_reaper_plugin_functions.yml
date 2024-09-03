@@ -81,8 +81,9 @@ jobs:
           reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
           wget "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
           tar -xf $reap_tar
-          cd reaper_linux_x86_64
-          sudo ./install-reaper.sh
+          pwd
+          # cd reaper_linux_x86_64
+          # ./install-reaper.sh
 
       - name: Clone reaper-sdk repository fork
         run: |
