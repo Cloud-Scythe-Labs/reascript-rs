@@ -5,7 +5,12 @@ DEVELOPER_WRITE_WINDOW_NAME="\[developer\] Write C\+\+ API functions header"
 function handle_save_dialog_box() {
     # Find the window ID of the Reaper save dialog box
     reaper_window_id=$(xdotool search --name "$DEVELOPER_WRITE_WINDOW_NAME")
-    echo "found save dialog window with ID: $reaper_window_id"
+    if [[ -n "$reaper_window_id" ]]; then
+        echo "found save dialog window with ID: $reaper_window_id"
+    else
+        echo "did not find the save dialog window"
+        exit 1
+    fi
 
     # Focus the Reaper save dialog box
     xdotool windowfocus "$reaper_window_id"
