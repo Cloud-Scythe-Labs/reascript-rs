@@ -74,12 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev xdotool xvfb
-
-      - name: Start Xvfb
-        run: |
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1280x1024x24 &
+          sudo apt-get install -y libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev x11-utils xdotool xvfb
 
       - name: Download and Extract Reaper
         run: |
@@ -98,11 +93,10 @@ jobs:
 
       - name: Generate header file
         run: |
-          export DISPLAY=:99
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
-          ./generate-reaper-plugin-functions/run.sh reaper_linux_x86_64/REAPER/reaper temp/reaper-sdk/sdk
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./generate-reaper-plugin-functions/run.sh reaper_linux_x86_64/REAPER/reaper temp/reaper-sdk/sdk
 
       - name: Commit and push changes
         run: |
