@@ -34,7 +34,7 @@ REAPER=$1
 SAVE_DIRECTORY=$2
 if [ -e "$SAVE_DIRECTORY" ]; then
     "$REAPER" ./generate_reaper_plugin_functions.lua &
-    sleep 5
+    sleep 10
     handle_save_dialog_box $SAVE_DIRECTORY
 else
     echo "'$SAVE_DIRECTORY' does not exist, please provide a valid path to a directory."
