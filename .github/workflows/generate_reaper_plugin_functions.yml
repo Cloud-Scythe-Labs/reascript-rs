@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dri libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev x11-utils xdotool xvfb fonts-dejavu fonts-liberation fonts-droid-fallback libxfont2
+          sudo apt-get install -y xserver-common libaudit1 libbsd0 libc6 libgcrypto20 libgl1 libpixman-1-0 libselinux1 libsystemd0 libunwind8 libxau6 libxdmcp6 xauth x11-xkb-utils libgl1-mesa-dri libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev x11-utils xdotool xvfb fonts-dejavu fonts-liberation fonts-droid-fallback libxfont2
 
       - name: Download and Extract Reaper
         run: |
