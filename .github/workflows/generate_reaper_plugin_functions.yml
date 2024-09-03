@@ -1,8 +1,17 @@
-name: Generate Reaper Plugin Functions Pull Request
+# name: Generate Reaper Plugin Functions Pull Request
+# on:
+#   schedule:
+#     - cron: '0 0 * * *' # Runs daily
+#   workflow_dispatch:
+name: Pull Request
 on:
-  schedule:
-    - cron: '0 0 * * *' # Runs daily
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 
 jobs:
   check-reaper-version:
@@ -10,6 +19,7 @@ jobs:
     outputs:
       latest_version: ${{ steps.get_version.outputs.latest_version }}
       update_needed: ${{ steps.check_for_update.outputs.update_needed }}
+      branch_exists: ${{ steps.check_branch.outputs.branch_exists }}
     steps:
       - name: Get latest Reaper release version
         id: get_version
@@ -37,10 +47,26 @@ jobs:
             echo "::set-output name=update_needed::false"
           fi
 
+      - name: Check if branch exists
+        id: check_branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name="update-header-${{ steps.get_version.outputs.latest_version }}"
+          api_url="https://api.github.com/repos/Cloud-Scythe-Labs/reaper-sdk/branches/${branch_name}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
+          if [[ "$response" == "200" ]]; then
+            echo "Branch $branch_name already exists"
+            echo "::set-output name=branch_exists::true"
+          else
+            echo "Branch $branch_name does not exist"
+            echo "::set-output name=branch_exists::false"
+          fi
+
   generate-reaper-plugin-functions:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' }}
+    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
     steps:
       - name: Install dependencies
         run: |
@@ -57,21 +83,25 @@ jobs:
 
       - name: Clone reaper-sdk repository fork
         run: |
-          git clone https://github.com/justinfrankel/reaper-sdk.git
+          mkdir temp
+          cd temp
+          git clone https://github.com/Cloud-Scythe-Labs/reaper-sdk.git
+          ls
 
       - name: Generate header file
         run: |
-          # Run your script and pass the path to the reaper-sdk directory
-          ./run.sh "$(pwd)/reaper-sdk/sdk"
+          pwd
+          ls
+          # Run the header generation script, overwriting the old header file.
+          ./run.sh "temp/reaper-sdk/sdk"
 
       - name: Commit and push changes
         run: |
           latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
           git config --global user.email "cloudscythelabs@gmail.com"
-          git config --global user.name "CloudScytheLabs"
+          git config --global user.name "Cloud Scythe Labs"
           git checkout -b update-header-${latest_version}
-          git add reaper_plugin_functions.h reaper_version.txt
-          echo "${latest_version}" > reaper_version.txt
+          git add reaper_plugin_functions.h
           git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
           git push origin update-header-${latest_version}
 
