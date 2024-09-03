@@ -78,8 +78,9 @@ jobs:
           latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
           file_tag=${latest_version%%.*} # retain only the major version
           reap_tag=${latest_version//./} # remove the '.'
-          wget "https://www.reaper.fm/files/${file_tag}.x/reaper${reap_tag}_linux_x86_64.tar.xz"
-          tar -xf reaper_linux_x86_64.tar.xz
+          reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
+          wget "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
+          tar -xf $reap_tar
           cd reaper_linux_x86_64
           sudo ./install-reaper.sh
 
