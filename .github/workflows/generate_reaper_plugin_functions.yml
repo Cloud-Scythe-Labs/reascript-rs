@@ -74,7 +74,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev
+          sudo apt-get install -y libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev xdotool xvfb
+
+      - name: Start Xvfb
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x1024x24 &
 
       - name: Download and Extract Reaper
         run: |
@@ -84,7 +89,6 @@ jobs:
           reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
           curl -sL -o "$reap_tar" "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
           tar -xf $reap_tar
-          cd reaper_linux_x86_64
 
       - name: Clone reaper-sdk repository fork
         run: |
@@ -94,6 +98,7 @@ jobs:
 
       - name: Generate header file
         run: |
+          export DISPLAY=:99
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
