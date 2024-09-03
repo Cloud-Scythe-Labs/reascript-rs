@@ -96,7 +96,7 @@ jobs:
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
-          xvfb-run -a -s "-screen 0 1920x1080x24" ./generate-reaper-plugin-functions/run.sh reaper_linux_x86_64/REAPER/reaper temp/reaper-sdk/sdk
+          xvfb-run -a -s "-screen 0 1920x1080x24" ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
 
       - name: Commit and push changes
         run: |
