@@ -76,7 +76,9 @@ jobs:
       - name: Download and Install Reaper
         run: |
           latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
-          wget "https://www.reaper.fm/files/${latest_version}/reaper_linux_x86_64.tar.xz"
+          file_tag=${latest_version%%.*} # retain only the major version
+          reap_tag=${latest_version//./} # remove the '.'
+          wget "https://www.reaper.fm/files/${file_tag}.x/reaper${reap_tag}_linux_x86_64.tar.xz"
           tar -xf reaper_linux_x86_64.tar.xz
           cd reaper_linux_x86_64
           sudo ./install-reaper.sh
