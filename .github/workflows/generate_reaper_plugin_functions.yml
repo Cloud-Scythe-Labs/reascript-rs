@@ -8,8 +8,8 @@ on:
   pull_request:
     branches:
       - master
-concurrency:
-  group: ${{ github.head_ref || github.run_id }}
+# concurrency:
+#   group: ${{ github.head_ref || github.run_id }}
   # cancel-in-progress: true
 
 
@@ -96,7 +96,9 @@ jobs:
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
-          xvfb-run -a -s "-screen 0 1920x1080x24" ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
+          xvfb-run -a -s "-screen 0 1920x1080x24" &
+          sleep 5 &
+          ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
 
       - name: Commit and push changes
         run: |
