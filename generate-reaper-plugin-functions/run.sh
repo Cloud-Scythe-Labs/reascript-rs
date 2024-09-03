@@ -25,9 +25,10 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-SAVE_DIRECTORY=$1
+REAPER=$1
+SAVE_DIRECTORY=$2
 if [ -e "$SAVE_DIRECTORY" ]; then
-    reaper ./generate_reaper_plugin_functions.lua &
+    "$REAPER" ./generate_reaper_plugin_functions.lua &
     sleep 5
     handle_save_dialog_box $SAVE_DIRECTORY
 else

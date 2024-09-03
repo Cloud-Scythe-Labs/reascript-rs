@@ -76,20 +76,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev
 
-      - name: Download and Install Reaper
+      - name: Download and Extract Reaper
         run: |
           latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
           file_tag=${latest_version%%.*} # retain only the major version
           reap_tag=${latest_version//./} # remove the '.'
           reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
-          curl -s -L -o "$reap_tar" "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
-          echo "finished downloading reaper tarball"
+          curl -sL -o "$reap_tar" "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
           tar -xf $reap_tar
-          echo "finished extracting reaper from tarball"
           cd reaper_linux_x86_64
-          echo "starting reaper install"
-          ./install-reaper.sh
-          echo "finished reaper install"
 
       - name: Clone reaper-sdk repository fork
         run: |
@@ -100,7 +95,9 @@ jobs:
       - name: Generate header file
         run: |
           # Run the header generation script, overwriting the old header file.
-          ./generate-reaper-plugin-functions/run.sh temp/reaper-sdk/sdk
+          # The runner path is:
+          # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
+          ./generate-reaper-plugin-functions/run.sh reaper_linux_x86_64/REAPER/reaper temp/reaper-sdk/sdk
 
       - name: Commit and push changes
         run: |
