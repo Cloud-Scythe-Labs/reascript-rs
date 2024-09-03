@@ -68,6 +68,9 @@ jobs:
     needs: check-reaper-version
     if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -81,29 +84,26 @@ jobs:
           reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
           wget "https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
           tar -xf $reap_tar
-          pwd
-          # cd reaper_linux_x86_64
-          # ./install-reaper.sh
+          cd reaper_linux_x86_64
+          ./install-reaper.sh
 
       - name: Clone reaper-sdk repository fork
         run: |
           mkdir temp
           cd temp
           git clone https://github.com/Cloud-Scythe-Labs/reaper-sdk.git
-          ls
 
       - name: Generate header file
         run: |
-          pwd
-          ls
           # Run the header generation script, overwriting the old header file.
-          ./run.sh "temp/reaper-sdk/sdk"
+          ./generate-reaper-plugin-functions/run.sh temp/reaper-sdk/sdk
 
       - name: Commit and push changes
         run: |
           latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
           git config --global user.email "cloudscythelabs@gmail.com"
           git config --global user.name "Cloud Scythe Labs"
+          cd temp
           git checkout -b update-header-${latest_version}
           git add reaper_plugin_functions.h
           git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
