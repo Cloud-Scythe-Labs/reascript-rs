@@ -44,12 +44,12 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "reaper";
-  version = "${latest_version}";
+  version = ${latest_version};
 
   src = fetchurl {
     url = url_for_platform version stdenv.hostPlatform.qemuArch;
     hash = if stdenv.isDarwin then "sha256-RtGGGbiEEPXYUqK5qpKcCEfIwhlP7/0bAOPMCG7tqZw=" else {
-      x86_64-linux = "${pkg_hash}";
+      x86_64-linux = ${pkg_hash};
       aarch64-linux = "sha256-YnKlONKCmXeV19oREJnXD5t3nEQZ5hVOOvDPtUIFw1A=";
     }.${stdenv.hostPlatform.system};
   };
