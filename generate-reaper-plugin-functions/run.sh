@@ -26,6 +26,10 @@ function handle_save_dialog_box() {
 }
 
 if [ -z "$1" ]; then
+    echo "Expected one argument which should be a path to a directory to a Reaper binary."
+    exit 1
+fi
+if [ -z "$2" ]; then
     echo "Expected one argument which should be a path to a directory to save the generated header file."
     exit 1
 fi
@@ -33,9 +37,9 @@ fi
 REAPER=$1
 SAVE_DIRECTORY=$2
 if [ -e "$SAVE_DIRECTORY" ]; then
-    "$REAPER" ./generate_reaper_plugin_functions.lua &
-    sleep 10
-    handle_save_dialog_box $SAVE_DIRECTORY
+    "$REAPER" ./generate_reaper_plugin_functions.lua # &
+    # sleep 10
+    # handle_save_dialog_box $SAVE_DIRECTORY
 else
     echo "'$SAVE_DIRECTORY' does not exist, please provide a valid path to a directory."
     exit 1

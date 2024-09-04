@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xorg xserver-common libaudit1 libbsd0 libc6 libgcrypt20 libgl1 libpixman-1-0 libselinux1 libsystemd0 libunwind8 libxau6 libxdmcp6 xauth x11-xkb-utils libgl1-mesa-dri libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev x11-utils xdotool xvfb fonts-dejavu fonts-liberation fonts-droid-fallback libxfont2
+          sudo apt-get install -y imagemagick xorg xserver-common libaudit1 libbsd0 libc6 libgcrypt20 libgl1 libpixman-1-0 libselinux1 libsystemd0 libunwind8 libxau6 libxdmcp6 xauth x11-xkb-utils libgl1-mesa-dri libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev x11-utils xdotool xvfb fonts-dejavu fonts-liberation fonts-droid-fallback libxfont2
 
       - name: Download and Extract Reaper
         run: |
@@ -97,6 +97,13 @@ jobs:
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
           xvfb-run -a ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
+          import -window root screenshot.png
+
+      - name: Upload screenshot as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenshot
+          path: screenshot.png      
 
       - name: Commit and push changes
         run: |
