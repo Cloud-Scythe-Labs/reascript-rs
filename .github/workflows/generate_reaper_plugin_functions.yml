@@ -81,9 +81,9 @@ jobs:
 
       - name: Start Xvfb
         run: |
-          xstart
           Xvfb :99 -screen 0 1024x768x16 &
           export DISPLAY=:99
+          sleep 3
           DISPLAY=:99 xvinfo
 
       - name: Download and Extract Reaper
