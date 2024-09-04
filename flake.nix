@@ -103,6 +103,7 @@
           buildInputs = with pkgs; [
             xvfb-run
             xdotool
+            xclip
             gnutar
 
             xorg.xorgserver
@@ -123,7 +124,6 @@
             xorg.xprop
             xorg.xwininfo
             xorg.xset
-            xorg.xclip
           ];
 
           shellHook = ''
