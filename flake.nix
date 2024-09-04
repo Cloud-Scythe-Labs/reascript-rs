@@ -105,25 +105,7 @@
             xdotool
             xclip
             gnutar
-
-            xorg.xorgserver
-            xorg.xauth
-            xorg.libX11
-            xorg.libXext
-            xorg.libxcb
-            xorg.libXrender
-            xorg.libXtst
-            xorg.libXcomposite
-            xorg.libXcursor
-            xorg.libXrandr
-            xorg.libXi
-            xorg.libXinerama
-            xorg.libXdamage
-            xorg.libXfixes
-            xorg.xrandr
-            xorg.xprop
-            xorg.xwininfo
-            xorg.xset
+            xorg
           ];
         };
     };
