@@ -101,7 +101,7 @@
         in
         pkgs.mkShell {
           buildInputs = with pkgs; [
-            xvfb
+            xvfb-run
             xdotool
             gnutar
 
