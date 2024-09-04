@@ -71,8 +71,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Nix
-        uses: cachix/install-nix-action@v17
+      # - name: Set up Nix
+      #   uses: cachix/install-nix-action@v17
 
       - name: Install Dependencies
         run: |
@@ -103,26 +103,27 @@ jobs:
 
       - name: Generate header file
         run: |
+          DISPLAY=:99 xvinfo
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
           xvfb-run -a ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
 
-      - name: Commit and push changes
-        run: |
-          latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
-          git config --global user.email "cloudscythelabs@gmail.com"
-          git config --global user.name "Cloud Scythe Labs"
-          cd temp
-          git checkout -b update-header-${latest_version}
-          git add reaper_plugin_functions.h
-          git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
-          git push origin update-header-${latest_version}
+      # - name: Commit and push changes
+      #   run: |
+      #     latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
+      #     git config --global user.email "cloudscythelabs@gmail.com"
+      #     git config --global user.name "Cloud Scythe Labs"
+      #     cd temp
+      #     git checkout -b update-header-${latest_version}
+      #     git add reaper_plugin_functions.h
+      #     git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
+      #     git push origin update-header-${latest_version}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: "update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
-          title: "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}"
-          body: "Automated update of the Reaper C++ API functions header."
+      # - name: Create Pull Request
+      #   uses: peter-evans/create-pull-request@v3
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     branch: "update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
+      #     title: "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}"
+      #     body: "Automated update of the Reaper C++ API functions header."
