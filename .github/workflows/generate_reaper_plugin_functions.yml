@@ -74,6 +74,12 @@ jobs:
       - name: Set up Nix
         uses: cachix/install-nix-action@v17
 
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y x11-utils x11-xserver-utils xfonts-base libxrender1 libxext6 libxtst6 libxi6 xfonts-100dpi xfonts-75dpi mesa-utils
+
+
       - name: Download and Extract Reaper
         run: |
           latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
