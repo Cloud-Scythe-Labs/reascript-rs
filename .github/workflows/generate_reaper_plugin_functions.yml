@@ -77,7 +77,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y x11-utils x11-xserver-utils xfonts-base libxrender1 libxext6 libxtst6 libxi6 xfonts-100dpi xfonts-75dpi mesa-utils
+          sudo apt-get install -y xorg x11-utils x11-xserver-utils xfonts-base libxrender1 libxext6 libxtst6 libxi6 xfonts-100dpi xfonts-75dpi mesa-utils
 
 
       - name: Download and Extract Reaper
