@@ -97,9 +97,15 @@ jobs:
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
           xvfb-run -a ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
-          import -window root screenshot.png
+        continue-on-error: true
+
+      - name: Capture screenshot
+        if: always()
+        run: |
+          import -window root screenshot.png || echo "Failed to capture screenshot"
 
       - name: Upload screenshot as artifact
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: screenshot
