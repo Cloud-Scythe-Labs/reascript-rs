@@ -81,8 +81,7 @@ jobs:
 
       - name: Start Xvfb
         run: |
-          echo $XDG_SESSION_TYPE
-          # export XDG_SESSION_TYPE=x11
+          xstart
           Xvfb :99 -screen 0 1024x768x16 &
           export DISPLAY=:99
           DISPLAY=:99 xvinfo
