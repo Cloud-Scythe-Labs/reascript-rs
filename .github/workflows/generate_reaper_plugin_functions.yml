@@ -71,10 +71,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick xorg xserver-common libaudit1 libbsd0 libc6 libgcrypt20 libgl1 libpixman-1-0 libselinux1 libsystemd0 libunwind8 libxau6 libxdmcp6 xauth x11-xkb-utils libgl1-mesa-dri libxcb-util1 libxcb-icccm4 libxcb-cursor0 libxcb-keysyms1 libxcb-xinerama0 libxcb-xkb1 libxkbcommon-x11-0 libxkbcommon0 libxcb-xrm0 libxcb-randr0 xcb-proto xcb libx11-xcb-dev x11-utils xdotool xvfb fonts-dejavu fonts-liberation fonts-droid-fallback libxfont2
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v17
 
       - name: Download and Extract Reaper
         run: |
@@ -93,12 +91,12 @@ jobs:
 
       - name: Generate header file
         run: |
-          export DISPLAY=:99
-          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+          # export DISPLAY=:99
+          # sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
-          ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
+          nix develop .#xorg-env -c ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
         continue-on-error: true
 
       - name: Capture screenshot
