@@ -103,6 +103,7 @@ jobs:
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
           nix develop .#xorg-env -c xvfb-run -a ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
+          echo $XDG_SESSION_TYPE
         continue-on-error: true
 
       - name: Capture screenshot

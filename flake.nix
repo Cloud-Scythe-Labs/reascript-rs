@@ -107,6 +107,7 @@
             gnutar
             xorg
           ];
+          XDG_SESSION_TYPE="x11";
         };
     };
 }
