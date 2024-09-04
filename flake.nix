@@ -105,7 +105,7 @@
             xdotool
             gnutar
 
-            xorg.xorg-server
+            xorg.xorgserver
             xorg.xauth
             xorg.libX11
             xorg.libXext
