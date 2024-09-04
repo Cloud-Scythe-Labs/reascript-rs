@@ -77,8 +77,14 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xorg x11-utils x11-xserver-utils xfonts-base libxrender1 libxext6 libxtst6 libxi6 xfonts-100dpi xfonts-75dpi mesa-utils
+          sudo apt-get install -y xorg x11-utils x11-xserver-utils xfonts-base libxrender1 libxext6 libxtst6 libxi6 xfonts-100dpi xfonts-75dpi mesa-utils xvfb
 
+      - name: Start Xvfb
+        run: |
+          export XDG_SESSION_TYPE=x11
+          Xvfb :99 -screen 0 1024x768x16 &
+          export DISPLAY=:99
+          pgrep Xvfb
 
       - name: Download and Extract Reaper
         run: |
@@ -97,26 +103,10 @@ jobs:
 
       - name: Generate header file
         run: |
-          # export DISPLAY=:99
-          # sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           # Run the header generation script, overwriting the old header file.
           # The runner path is:
           # /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper
-          nix develop .#xorg-env -c xvfb-run -a ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
-          echo $XDG_SESSION_TYPE
-        continue-on-error: true
-
-      - name: Capture screenshot
-        if: always()
-        run: |
-          import -window root screenshot.png || echo "Failed to capture screenshot"
-
-      - name: Upload screenshot as artifact
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: screenshot
-          path: screenshot.png      
+          xvfb-run -a ./generate-reaper-plugin-functions/run.sh /home/runner/work/reascript-rs/reascript-rs/reaper_linux_x86_64/REAPER/reaper /home/runner/work/reascript-rs/reascript-rs/temp/reaper-sdk/sdk
 
       - name: Commit and push changes
         run: |
