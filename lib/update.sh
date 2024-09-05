@@ -1,21 +1,47 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p curl common-updater-scripts
+#!nix-shell -i bash -p curl
 
 set -euo pipefail
 
 latest_version=$(curl -s https://www.reaper.fm/download.php | grep -oP 'REAPER \K[0-9.]+')
 
-function set_hash_for_linux() {
+function update_nix_flake() {
+  local flake="$1"
+
   file_tag=${latest_version%%.*} # retain only the major version
   reap_tag=${latest_version//./} # remove the '.'
   reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
   reaper_tarball_link="https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
 
-  pkg_hash=$(nix-prefetch-url "$reaper_tarball_link")
-  pkg_hash=$(nix hash to-sri "sha256:$pkg_hash")
+  echo "Updating REAPER tarball URL to: ${reaper_tarball_link}"
 
-  echo ${reaper_tarball_link}
-  echo ${pkg_hash}
+  awk -v new_url="$reaper_tarball_link" '
+  BEGIN { url_updated = 0 }
+  {
+    if ($0 ~ /reaper\s*=\s*\{/ && url_updated == 0) {
+      print
+      while (getline) {
+        if ($0 ~ /url\s*=/) {
+          sub(/url\s*=\s*"[^"]*"/, "url = \"" new_url "\"")
+          url_updated = 1
+        }
+        print
+        if ($0 ~ /}/) {
+          break
+        }
+      }
+    } else {
+      print
+  }
+}
+' "$flake" > "${flake}.tmp" && mv "${flake}.tmp" "$flake"
 }
 
-set_hash_for_linux x86_64
+nix_flake="$(pwd)/flake.nix"
+
+if [ ! -f "$nix_flake" ]; then
+  echo "Error: $nix_flake does not exist."
+  exit 1
+fi
+
+update_nix_flake "$nix_flake"
