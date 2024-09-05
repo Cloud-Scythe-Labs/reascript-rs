@@ -101,8 +101,8 @@ jobs:
           git config --global user.name "Cloud Scythe Labs"
           cd temp/reaper-sdk/sdk
           git remote -v
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Cloud-Scythe-Labs/reaper-sdk.git"
           git status
+          git remote set-url origin "https://x-access-token:${{ secrets.REASCRIPT_PULL_REQUEST }}@github.com/Cloud-Scythe-Labs/reaper-sdk.git"
           git checkout -b update-header-${latest_version}
           git add reaper_plugin_functions.h
           git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
