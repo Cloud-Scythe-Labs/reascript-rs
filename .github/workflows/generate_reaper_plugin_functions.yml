@@ -1,18 +1,9 @@
-# name: Generate Reaper Plugin Functions Pull Request
-# on:
-#   schedule:
-#     - cron: '0 0 * * *' # Runs daily
-#   workflow_dispatch:
-name: Pull Request
 on:
-  pull_request:
-    branches:
-      - master
+  schedule:
+    # Runs every night at midnight (UTC)
+    - cron: '0 0 * * *'
 permissions:
   contents: write
-# concurrency:
-#   group: ${{ github.head_ref || github.run_id }}
-  # cancel-in-progress: true
 
 
 jobs:
