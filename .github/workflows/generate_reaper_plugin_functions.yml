@@ -108,5 +108,10 @@ jobs:
           git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
           git push origin update-header-${latest_version}
           curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
-            -d '{"title":"Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}","body":"Automated update of the Reaper C++ API functions header.","head":"update-header-${{ needs.check-reaper-version.outputs.latest_version }}","base":"main"}' \
-            https://api.github.com/repos/Cloud-Scythe-Labs/reaper-sdk/pulls
+            -d '{
+                  "title": "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}",
+                  "body": "Automated update of the Reaper C++ API functions header.",
+                  "head": "update-header-${{ needs.check-reaper-version.outputs.latest_version }}",
+                  "base":"main"
+                }' \
+            https://api.github.com/repos/justinfrankel/reaper-sdk/pulls
