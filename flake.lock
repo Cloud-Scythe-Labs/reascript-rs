@@ -101,13 +101,27 @@
         "type": "github"
       }
     },
+    "reaper": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1724670340,
+        "narHash": "sha256-yZPYxquik6xJq55t0WDrYx2V/lU/Zu96aOdBHA9IYmA=",
+        "type": "tarball",
+        "url": "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz"
+      }
+    },
     "root": {
       "inputs": {
         "crane": "crane",
         "fenix": "fenix",
         "flake-utils": "flake-utils",
         "nix-core": "nix-core",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "reaper": "reaper"
       }
     },
     "systems": {

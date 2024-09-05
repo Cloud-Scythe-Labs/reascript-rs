@@ -1,5 +1,9 @@
 {
   inputs = {
+    reaper = {
+      url = "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz";
+      flake = false;
+    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     fenix = {
@@ -19,113 +23,96 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, crane, nix-core, fenix }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        inherit (pkgs) lib;
-        pkgs = nixpkgs.legacyPackages.${system};
-        toolchains = nix-core.toolchains.${system};
-
-        rustToolchain = toolchains.mkRustToolchainFromTOML ./rust-toolchain.toml
-          "sha256-opUgs6ckUQCyDxcB9Wy51pqhd0MPGHUVbwRKKPGiwZU=";
-        craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain.fenix-pkgs;
-        src = craneLib.cleanCargoSource ./.;
-        commonArgs = {
-          inherit src;
-          strictDeps = true;
-          buildInputs = rustToolchain.complete;
-        };
-        cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-        individualCrateArgs = commonArgs // {
-          inherit cargoArtifacts;
-          inherit (craneLib.crateNameFromCargoToml { inherit src; }) version;
-        };
-
-        fileSetForCrate = crate: lib.fileset.toSource {
-          root = ./.;
-          fileset = lib.fileset.unions [
-            ./Cargo.toml
-            ./Cargo.lock
-            ./meta
-            crate
-          ];
-        };
-        reascript-gen = craneLib.buildPackage (individualCrateArgs // {
-          pname = "reascript-gen";
-          cargoExtraArgs = "-p reascript-gen";
-          src = fileSetForCrate ./meta/gen;
-        });
-        reascript-proc = craneLib.buildPackage (individualCrateArgs // {
-          pname = "reascript-proc";
-          cargoExtraArgs = "-p reascript-proc";
-          src = fileSetForCrate ./meta/proc;
-        });
-      in
-      {
-        checks = {
-          inherit reascript-gen reascript-proc;
-          workspace-clippy = craneLib.cargoClippy (commonArgs // {
-            inherit cargoArtifacts;
-            cargoClippyExtraArgs = "--all-targets -- --deny warnings";
-          });
-
-          workspace-doc = craneLib.cargoDoc (commonArgs // {
-            inherit cargoArtifacts;
-          });
-
-          # Check formatting
-          workspace-fmt = craneLib.cargoFmt {
-            inherit src;
-          };
-        };
-        packages = {
-          inherit reascript-gen reascript-proc;
-        } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
-          my-workspace-llvm-coverage = craneLib.cargoLlvmCov (commonArgs // {
-            inherit cargoArtifacts;
-          });
-        };
-        devShells.default = craneLib.devShell {
-          checks = self.checks.${system};
-          packages = with pkgs; [
-            nil
-            nixpkgs-fmt
-          ] ++ rustToolchain.complete;
-        };
-        formatter = pkgs.nixpkgs-fmt;
-      }
-    ) // {
-      devShells.x86_64-linux.xorg-env =
+  outputs = { self, nixpkgs, flake-utils, crane, nix-core, fenix, ... }@inputs:
+    flake-utils.lib.eachDefaultSystem
+      (system:
         let
-          pkgs = self.inputs.nixpkgs.legacyPackages.x86_64-linux;
-        in
-        pkgs.mkShell {
-          buildInputs = with pkgs; [
-            xvfb-run
-            xdotool
-            xclip
-            gnutar
+          inherit (pkgs) lib;
+          pkgs = nixpkgs.legacyPackages.${system};
+          toolchains = nix-core.toolchains.${system};
 
-            xorg.xorgserver
-            xorg.xauth
-            xorg.libX11
-            xorg.libXext
-            xorg.libxcb
-            xorg.libXrender
-            xorg.libXtst
-            xorg.libXcomposite
-            xorg.libXcursor
-            xorg.libXrandr
-            xorg.libXi
-            xorg.libXinerama
-            xorg.libXdamage
-            xorg.libXfixes
-            xorg.xrandr
-            xorg.xprop
-            xorg.xwininfo
-            xorg.xset
-          ];
-          XDG_SESSION_TYPE="x11";
-        };
-    };
+          rustToolchain = toolchains.mkRustToolchainFromTOML ./rust-toolchain.toml
+            "sha256-opUgs6ckUQCyDxcB9Wy51pqhd0MPGHUVbwRKKPGiwZU=";
+          craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain.fenix-pkgs;
+          src = craneLib.cleanCargoSource ./.;
+          commonArgs = {
+            inherit src;
+            strictDeps = true;
+            buildInputs = rustToolchain.complete;
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+          individualCrateArgs = commonArgs // {
+            inherit cargoArtifacts;
+            inherit (craneLib.crateNameFromCargoToml { inherit src; }) version;
+          };
+
+          fileSetForCrate = crate: lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              ./Cargo.toml
+              ./Cargo.lock
+              ./meta
+              crate
+            ];
+          };
+          reascript-gen = craneLib.buildPackage (individualCrateArgs // {
+            pname = "reascript-gen";
+            cargoExtraArgs = "-p reascript-gen";
+            src = fileSetForCrate ./meta/gen;
+          });
+          reascript-proc = craneLib.buildPackage (individualCrateArgs // {
+            pname = "reascript-proc";
+            cargoExtraArgs = "-p reascript-proc";
+            src = fileSetForCrate ./meta/proc;
+          });
+        in
+        {
+          checks = {
+            inherit reascript-gen reascript-proc;
+            workspace-clippy = craneLib.cargoClippy (commonArgs // {
+              inherit cargoArtifacts;
+              cargoClippyExtraArgs = "--all-targets -- --deny warnings";
+            });
+
+            workspace-doc = craneLib.cargoDoc (commonArgs // {
+              inherit cargoArtifacts;
+            });
+
+            # Check formatting
+            workspace-fmt = craneLib.cargoFmt {
+              inherit src;
+            };
+          };
+          packages = {
+            inherit reascript-gen reascript-proc;
+            reaper-plugin-functions = pkgs.runCommand "reaper-plugin-functions"
+              {
+                buildInputs = with pkgs; [
+                  xvfb-run
+                  xdotool
+                  which
+                  (reaper.overrideAttrs {
+                    meta.license = "";
+                    src = inputs.reaper;
+                  })
+                ];
+              } ''
+              mkdir -p $out/include
+              xvfb-run -a bash ${./generate-reaper-plugin-functions/run.sh} $(which reaper) ${./generate-reaper-plugin-functions} $out/include
+            '';
+          } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+            my-workspace-llvm-coverage = craneLib.cargoLlvmCov (commonArgs // {
+              inherit cargoArtifacts;
+            });
+          };
+          devShells.default = craneLib.devShell {
+            checks = self.checks.${system};
+            packages = with pkgs; [
+              nil
+              nixpkgs-fmt
+            ] ++ rustToolchain.complete;
+          };
+          formatter = pkgs.nixpkgs-fmt;
+        }
+      );
 }
