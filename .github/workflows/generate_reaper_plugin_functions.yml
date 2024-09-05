@@ -107,20 +107,6 @@ jobs:
           git add reaper_plugin_functions.h
           git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
           git push origin update-header-${latest_version}
-
-  open-pull-request:
-    runs-on: ubuntu-latest
-    needs: [check-reaper-version, generate-reaper-plugin-functions]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          repository: Cloud-Scythe-Labs/reaper-sdk
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.REASCRIPT_PULL_REQUEST }}
-          base: main
-          branch: "update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
-          title: "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}"
-          body: "Automated update of the Reaper C++ API functions header."
-          push-to-fork: Cloud-Scythe-Labs/reaper-sdk
+          curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
+            -d '{"title":"Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}","body":"Automated update of the Reaper C++ API functions header.","head":"update-header-${{ needs.check-reaper-version.outputs.latest_version }}","base":"main"}' \
+            https://api.github.com/repos/Cloud-Scythe-Labs/reaper-sdk/pulls
