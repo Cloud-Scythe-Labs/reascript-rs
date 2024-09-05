@@ -38,10 +38,11 @@ REAPER=$1
 SAVE_DIRECTORY=$2
 if [ -e "$SAVE_DIRECTORY" ]; then
     "$REAPER" ./generate_reaper_plugin_functions.lua &
+    export reaper_pid=$!
     sleep 5
     handle_save_dialog_box $SAVE_DIRECTORY
+    kill $reaper_pid
 else
     echo "'$SAVE_DIRECTORY' does not exist, please provide a valid path to a directory."
     exit 1
 fi
-# TODO: Exit Reaper when finished
