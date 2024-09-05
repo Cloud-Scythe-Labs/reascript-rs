@@ -72,7 +72,7 @@ jobs:
     if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Nix
         uses: cachix/install-nix-action@v17
@@ -108,11 +108,19 @@ jobs:
           git commit -m "Update Reaper C++ API functions header to version ${latest_version}"
           git push origin update-header-${latest_version}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+  open-pull-request:
+    runs-on: unbuntu-latest
+    needs: [check-reaper-version, generate-reaper-plugin-functions]
+    steps:
+      - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: Cloud-Scythe-Labs/reaper-sdk
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.REASCRIPT_PULL_REQUEST }}
           base: Cloud-Scythe-Labs/reaper-sdk/main
           branch: "Cloud-Scythe-Labs/reaper-sdk/update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
           title: "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}"
           body: "Automated update of the Reaper C++ API functions header."
+          delete-branch: true
