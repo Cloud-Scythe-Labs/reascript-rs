@@ -109,7 +109,7 @@ jobs:
           git push origin update-header-${latest_version}
 
   open-pull-request:
-    runs-on: unbuntu-latest
+    runs-on: ubuntu-latest
     needs: [check-reaper-version, generate-reaper-plugin-functions]
     steps:
       - uses: actions/checkout@v4
@@ -119,8 +119,8 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.REASCRIPT_PULL_REQUEST }}
-          base: Cloud-Scythe-Labs/reaper-sdk/main
-          branch: "Cloud-Scythe-Labs/reaper-sdk/update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
+          base: main
+          branch: "update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
           title: "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}"
           body: "Automated update of the Reaper C++ API functions header."
           delete-branch: true
