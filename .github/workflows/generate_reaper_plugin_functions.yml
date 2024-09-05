@@ -112,6 +112,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          head: "update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
           branch: "update-header-${{ needs.check-reaper-version.outputs.latest_version }}"
           title: "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}"
           body: "Automated update of the Reaper C++ API functions header."
