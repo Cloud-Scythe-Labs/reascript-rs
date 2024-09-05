@@ -74,7 +74,7 @@ if [ -e "$SAVE_DIRECTORY" ]; then
     kill $reaper_pid
 
     # run the plugin
-    "$REAPER" "./$GENERATE_REAPER_PLUGIN_FUNCTIONS_LUA_FILENAME" &
+    "$REAPER" "$LUA_PLUGIN_PATH/$GENERATE_REAPER_PLUGIN_FUNCTIONS_LUA_FILENAME" &
     export reaper_pid=$!
     sleep 5
     handle_save_dialog_box $SAVE_DIRECTORY
