@@ -111,7 +111,7 @@ jobs:
             -d '{
                   "title": "Update Reaper C++ API functions header to version ${{ needs.check-reaper-version.outputs.latest_version }}",
                   "body": "Automated update of the Reaper C++ API functions header.",
-                  "head": "update-header-${{ needs.check-reaper-version.outputs.latest_version }}",
+                  "head": "Cloud-Scythe-Labs:update-header-${{ needs.check-reaper-version.outputs.latest_version }}",
                   "base":"main"
                 }' \
             https://api.github.com/repos/justinfrankel/reaper-sdk/pulls
