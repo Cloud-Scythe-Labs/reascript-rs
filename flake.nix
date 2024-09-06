@@ -111,7 +111,7 @@
             devShells.default = craneLib.devShell {
               checks = self.checks.${system};
               packages = with pkgs; [
-                (pkgs.callPackage ./lib/update.nix {})
+                (pkgs.callPackage ./lib/update.nix { })
                 nil
                 nixpkgs-fmt
               ] ++ rustToolchain.complete;
