@@ -41,7 +41,7 @@ jobs:
             echo "::set-output name=update_needed::false"
           fi
 
-      - name: Check if branch exists
+      - name: Check if reaper-sdk branch exists
         id: check_branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,11 +57,29 @@ jobs:
             echo "::set-output name=branch_exists::false"
           fi
 
+      - name: Check if reascript-rs branch exists
+        id: check_branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name="update-reaper-flake-input-${{ steps.get_version.outputs.latest_version }}"
+          api_url="https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/branches/${branch_name}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
+          if [[ "$response" == "200" ]]; then
+            echo "Branch $branch_name already exists"
+            echo "::set-output name=branch_exists::true"
+          else
+            echo "Branch $branch_name does not exist"
+            echo "::set-output name=branch_exists::false"
+          fi
+
+        
+
   update_reaper_tarball_url:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'true' }}
-    step:
+    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -90,7 +108,7 @@ jobs:
                   "head": "Cloud-Scythe-Labs:update-reaper-flake-input-${{ needs.check-reaper-version.outputs.latest_version }}",
                   "base": "master"
                 }' \
-            https://api.github.com/repos/CloudScytheLabs/reascript-rs/pulls
+            https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls
             
   generate-reaper-plugin-functions:
     runs-on: ubuntu-latest
