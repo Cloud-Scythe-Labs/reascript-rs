@@ -41,6 +41,24 @@
         "type": "github"
       }
     },
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1725234343,
+        "narHash": "sha256-+ebgonl3NbiKD2UD0x4BszCZQ6sTfL4xioaM49o5B3Y=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "567b938d64d4b4112ee253b9274472dc3a346eb6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -64,9 +82,7 @@
         "fenix": [
           "fenix"
         ],
-        "flake-utils": [
-          "flake-utils"
-        ],
+        "flake-utils": "flake-utils",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -101,13 +117,39 @@
         "type": "github"
       }
     },
+    "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1725233747,
+        "narHash": "sha256-Ss8QWLXdr2JCBPcYChJhz4xJm+h/xjl4G0c0XlP6a74=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/356624c12086a18f2ea2825fed34523d60ccc4e3.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/356624c12086a18f2ea2825fed34523d60ccc4e3.tar.gz"
+      }
+    },
+    "reaper": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1724670340,
+        "narHash": "sha256-yZPYxquik6xJq55t0WDrYx2V/lU/Zu96aOdBHA9IYmA=",
+        "type": "tarball",
+        "url": "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz"
+      }
+    },
     "root": {
       "inputs": {
         "crane": "crane",
         "fenix": "fenix",
-        "flake-utils": "flake-utils",
+        "flake-parts": "flake-parts",
         "nix-core": "nix-core",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "reaper": "reaper"
       }
     },
     "systems": {
