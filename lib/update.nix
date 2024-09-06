@@ -7,12 +7,12 @@ pkgs.writeShellScriptBin "update.sh" ''
   function update_nix_flake() {
     local flake="$1"
 
-    file_tag=${latest_version%%.*} # retain only the major version
-    reap_tag=${latest_version//./} # remove the '.'
-    reap_tar="reaper${reap_tag}_linux_x86_64.tar.xz"
-    reaper_tarball_link="https://www.reaper.fm/files/${file_tag}.x/${reap_tar}"
+    file_tag=''${latest_version%%.*} # retain only the major version
+    reap_tag=''${latest_version//./} # remove the '.'
+    reap_tar="reaper''${reap_tag}_linux_x86_64.tar.xz"
+    reaper_tarball_link="https://www.reaper.fm/files/''${file_tag}.x/''${reap_tar}"
 
-    echo "Updating REAPER tarball URL to: ${reaper_tarball_link}"
+    echo "Updating REAPER tarball URL to: ''${reaper_tarball_link}"
 
     awk -v new_url="$reaper_tarball_link" '
     BEGIN { url_updated = 0 }
@@ -33,7 +33,7 @@ pkgs.writeShellScriptBin "update.sh" ''
         print
     }
   }
-  ' "$flake" > "${flake}.tmp" && mv "${flake}.tmp" "$flake"
+  ' "$flake" > "''${flake}.tmp" && mv "''${flake}.tmp" "$flake"
   }
 
   nix_flake="$(pwd)/flake.nix"
