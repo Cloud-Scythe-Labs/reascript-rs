@@ -12,7 +12,8 @@ jobs:
     outputs:
       latest_version: ${{ steps.get_version.outputs.latest_version }}
       update_needed: ${{ steps.check_for_update.outputs.update_needed }}
-      branch_exists: ${{ steps.check_branch.outputs.branch_exists }}
+      sdk_branch_exists: ${{ steps.check_reaper_sdk_branch.outputs.sdk_branch_exists }}
+      rs_branch_exists: ${{ steps.check_reascript_rs_branch.outputs.rs_branch_exists }}
     steps:
       - name: Get latest Reaper release version
         id: get_version
@@ -42,7 +43,7 @@ jobs:
           fi
 
       - name: Check if reaper-sdk branch exists
-        id: check_branch
+        id: check_reaper_sdk_branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -51,14 +52,14 @@ jobs:
           response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
           if [[ "$response" == "200" ]]; then
             echo "Branch $branch_name already exists"
-            echo "::set-output name=branch_exists::true"
+            echo "::set-output name=sdk_branch_exists::true"
           else
             echo "Branch $branch_name does not exist"
-            echo "::set-output name=branch_exists::false"
+            echo "::set-output name=sdk_branch_exists::false"
           fi
 
       - name: Check if reascript-rs branch exists
-        id: check_branch
+        id: check_reascript_rs_branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -67,10 +68,10 @@ jobs:
           response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
           if [[ "$response" == "200" ]]; then
             echo "Branch $branch_name already exists"
-            echo "::set-output name=branch_exists::true"
+            echo "::set-output name=rs_branch_exists::true"
           else
             echo "Branch $branch_name does not exist"
-            echo "::set-output name=branch_exists::false"
+            echo "::set-output name=rs_branch_exists::false"
           fi
 
         
@@ -78,7 +79,7 @@ jobs:
   update_reaper_tarball_url:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
+    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.rs_branch_exists == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -113,7 +114,7 @@ jobs:
   generate-reaper-plugin-functions:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
+    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.sdk_branch_exists == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
