@@ -110,8 +110,14 @@ jobs:
                   "base": "master"
                 }' \
             https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
+
+          echo "Debug: $pull_request_res"
+
           if echo "$pull_request_res" | grep -q "nothing to commit, working tree clean"; then
+            echo "No changes to commit."
             exit 0
+          else
+            echo "Proceeding with the commit."
           fi
             
   generate-reaper-plugin-functions:
