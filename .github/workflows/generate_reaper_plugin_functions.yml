@@ -17,6 +17,7 @@ jobs:
     outputs:
       latest_version: ${{ steps.get_version.outputs.latest_version }}
       sdk_update_needed: ${{ steps.check_for_sdk_update.outputs.sdk_update_needed }}
+      rs_update_needed: ${{ steps.check_for_rs_update.outputs.rs_update_needed }}
       sdk_branch_exists: ${{ steps.check_reaper_sdk_branch.outputs.sdk_branch_exists }}
       rs_branch_exists: ${{ steps.check_reascript_rs_branch.outputs.rs_branch_exists }}
     steps:
@@ -47,6 +48,25 @@ jobs:
             echo "::set-output name=sdk_update_needed::false"
           fi
 
+      - name: Check if rs update is needed
+        id: check_for_rs_update
+        run: |
+          # Extract the full version number from the current flake.nix file
+          # and compare it to the latest version on reaper.fm download page.
+          # The version syntax in this case is 'XXX' with no '.' separation.
+          current_version=$(grep -oP 'reaper\K\d{3}' flake.nix)
+          echo "Current version: $current_version"
+          raw_latest_version=${{ steps.get_version.outputs.latest_version }}
+          latest_version=${raw_latest_version//./} # remove the '.'
+
+          if [[ "$(printf '%s\n' "$current_version" "$latest_version" | sort -V | head -n 1)" != "$latest_version" ]]; then
+            echo "Update needed"
+            echo "::set-output name=rs_update_needed::true"
+          else
+            echo "No update needed"
+            echo "::set-output name=rs_update_needed::false"
+          fi
+          
       - name: Check if reaper-sdk branch exists
         id: check_reaper_sdk_branch
         env:
@@ -84,7 +104,7 @@ jobs:
   update_reaper_tarball_url:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.rs_branch_exists == 'false' }}
+    if: ${{ needs.check-reaper-version.outputs.rs_update_needed == 'true' && needs.check-reaper-version.outputs.rs_branch_exists == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
