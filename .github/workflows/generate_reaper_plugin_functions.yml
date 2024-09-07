@@ -51,9 +51,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: List files for debugging
-        run: ls -al
-
       - name: Check if rs update is needed
         id: check_for_rs_update
         run: |
