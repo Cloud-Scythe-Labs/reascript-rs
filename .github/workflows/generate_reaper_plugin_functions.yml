@@ -110,7 +110,7 @@ jobs:
                   "base": "master"
                 }' \
             https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
-          if [[ "$pull_request_res" =~ "nothing to commit, working tree clean" ]]; then
+          if echo "$pull_request_res" | grep -q "nothing to commit, working tree clean"; then
             exit 0
           fi
             
