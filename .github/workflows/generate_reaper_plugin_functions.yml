@@ -1,7 +1,11 @@
+# on:
+#   schedule:
+#     # Runs every night at midnight (UTC)
+#     - cron: '0 0 * * *'
 on:
-  schedule:
-    # Runs every night at midnight (UTC)
-    - cron: '0 0 * * *'
+  pull_request:
+    branches:
+      - master
 permissions:
   contents: write
 
