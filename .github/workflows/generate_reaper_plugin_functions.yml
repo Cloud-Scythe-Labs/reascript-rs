@@ -1,11 +1,7 @@
-# on:
-#   schedule:
-#     # Runs every night at midnight (UTC)
-#     - cron: '0 0 * * *'
 on:
-  pull_request:
-    branches:
-      - master
+  schedule:
+    # Runs every night at midnight (UTC)
+    - cron: '0 0 * * *'
 permissions:
   contents: write
 
@@ -106,14 +102,16 @@ jobs:
           git add -u
           git commit -m "Update Reaper tarball URL ${latest_version}"
           git push origin update-reaper-flake-input-${latest_version}
-          curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
+          pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
             -d '{
                   "title": "Update Reaper tarball URL ${{ needs.check-reaper-version.outputs.latest_version }}",
                   "body": "automated update of the reaper tarball URL.",
                   "head": "update-reaper-flake-input-${{ needs.check-reaper-version.outputs.latest_version }}",
-                  "base": "andrewvious/19"
+                  "base": "master"
                 }' \
-            https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls
+            https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
+          if [ "$(pull_request_res)" = 'nothing to commit, working tree clean' ]; then
+            exit 0
             
   generate-reaper-plugin-functions:
     runs-on: ubuntu-latest
