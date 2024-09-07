@@ -83,7 +83,7 @@ jobs:
   update_reaper_tarball_url:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.rs_branch_exists == 'false' }}
+    if: ${{ needs.check-reaper-version.outputs.rs_branch_exists == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -110,8 +110,8 @@ jobs:
             -d '{
                   "title": "Update Reaper tarball URL ${{ needs.check-reaper-version.outputs.latest_version }}",
                   "body": "automated update of the reaper tarball URL.",
-                  "head": "Cloud-Scythe-Labs:update-reaper-flake-input-${{ needs.check-reaper-version.outputs.latest_version }}",
-                  "base": "master"
+                  "head": "update-reaper-flake-input-${{ needs.check-reaper-version.outputs.latest_version }}",
+                  "base": "andrewvious/19"
                 }' \
             https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls
             
