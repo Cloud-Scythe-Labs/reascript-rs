@@ -1,7 +1,7 @@
 {
   inputs = {
     reaper = {
-      url = "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz";
+      url = "https://www.reaper.fm/files/7.x/reaper720_linux_x86_64.tar.xz";
       flake = false;
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -111,6 +111,7 @@
             devShells.default = craneLib.devShell {
               checks = self.checks.${system};
               packages = with pkgs; [
+                (pkgs.callPackage ./lib/update.nix { })
                 nil
                 nixpkgs-fmt
               ] ++ rustToolchain.complete;
