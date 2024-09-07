@@ -47,6 +47,12 @@ jobs:
             echo "No update needed"
             echo "::set-output name=sdk_update_needed::false"
           fi
+          
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: List files for debugging
+        run: ls -al
 
       - name: Check if rs update is needed
         id: check_for_rs_update
