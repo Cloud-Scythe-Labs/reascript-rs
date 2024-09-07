@@ -1,12 +1,8 @@
 name: Reaper Checks
 on:
-  pull_request:
-    branches:
-      - master
-# on:
-#   schedule:
-#     # Runs every night at midnight (UTC)
-#     - cron: '0 0 * * *'
+  schedule:
+    # Runs every night at midnight (UTC)
+    - cron: '0 0 * * *'
 permissions:
   contents: write
 
@@ -57,7 +53,7 @@ jobs:
           # Extract the full version number from the current flake.nix file
           # and compare it to the latest version on reaper.fm download page.
           # The version syntax in this case is 'XXX' with no '.' separation.
-          current_version=$(grep -oP 'reaper\K\d{3}' ./flake.nix)
+          current_version=$(grep -oP 'reaper\K([0-9])+' ./flake.nix)
           echo "Current version: $current_version"
           raw_latest_version=${{ steps.get_version.outputs.latest_version }}
           latest_version=${raw_latest_version//./} # remove the '.'
