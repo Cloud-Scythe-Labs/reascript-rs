@@ -7,7 +7,7 @@ let
   grep' = "${gnugrep}/bin/grep";
   awk' = "${gawk}/bin/awk";
 in
-writeShellScriptBin "reaper_flake_input_update.sh" ''
+writeShellScriptBin "update_reaper_flake_input.sh" ''
   set -euo pipefail
 
   latest_version=$(${curl'} -s https://www.reaper.fm/download.php | ${grep'} -oP 'REAPER \K[0-9.]+')
