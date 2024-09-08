@@ -55,6 +55,7 @@
                 crate
               ];
             };
+            scripts = pkgs.callPackage ./scripts/generate_reaper_plugin_functions.nix { };
             reascript-gen = craneLib.buildPackage (individualCrateArgs // {
               pname = "reascript-gen";
               cargoExtraArgs = "-p reascript-gen";
@@ -104,7 +105,7 @@
                   ];
                 } ''
                 mkdir -p $out/include
-                xvfb-run -a bash ${./generate-reaper-plugin-functions/run.sh} $(which reaper) ${./generate-reaper-plugin-functions} $out/include
+                xvfb-run -a bash ${scripts.genReaperPluginFunctionsBin}/bin/generate_reaper_plugin_functions.sh $(which reaper) ${scripts.genReaperPluginFunctionsLua}/bin $out/include
               '';
             };
 
