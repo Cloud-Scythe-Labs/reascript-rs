@@ -113,7 +113,7 @@ jobs:
 
       - name: Update REAPER tarball URL
         run: |
-          nix develop -c update.sh
+          nix develop -c reaper_flake_input_update.sh
           nix flake update reaper
 
       - name: Commit and push changes
