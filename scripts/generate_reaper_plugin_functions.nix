@@ -102,5 +102,5 @@ let
   };
 in
 {
-    inherit genReaperPluginFunctionsBin genReaperPluginFunctionsLua;
+  inherit genReaperPluginFunctionsBin genReaperPluginFunctionsLua;
 }
