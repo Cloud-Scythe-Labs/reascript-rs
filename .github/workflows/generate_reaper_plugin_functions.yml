@@ -1,3 +1,4 @@
+name: Reaper Checks
 on:
   schedule:
     # Runs every night at midnight (UTC)
@@ -11,8 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       latest_version: ${{ steps.get_version.outputs.latest_version }}
-      update_needed: ${{ steps.check_for_update.outputs.update_needed }}
-      branch_exists: ${{ steps.check_branch.outputs.branch_exists }}
+      sdk_update_needed: ${{ steps.check_for_sdk_update.outputs.sdk_update_needed }}
+      reaper_flake_input_update_needed: ${{ steps.check_for_reaper_flake_input_update.outputs.reaper_flake_input_update_needed }}
+      sdk_branch_exists: ${{ steps.check_reaper_sdk_branch.outputs.sdk_branch_exists }}
+      rs_branch_exists: ${{ steps.check_reascript_rs_branch.outputs.rs_branch_exists }}
     steps:
       - name: Get latest Reaper release version
         id: get_version
@@ -25,8 +28,8 @@ jobs:
           echo "Latest version: $latest_version"
           echo "::set-output name=latest_version::$latest_version"
 
-      - name: Check if update is needed
-        id: check_for_update
+      - name: Check if sdk update is needed
+        id: check_for_sdk_update
         run: |
           # Extract the full version number from the generated header file
           # and compare it to the latest version on reaper.fm download page.
@@ -35,14 +38,36 @@ jobs:
           latest_version=${{ steps.get_version.outputs.latest_version }}
           if [[ "$(printf '%s\n' "$current_version" "$latest_version" | sort -V | head -n 1)" != "$latest_version" ]]; then
             echo "Update needed"
-            echo "::set-output name=update_needed::true"
+            echo "::set-output name=sdk_update_needed::true"
           else
             echo "No update needed"
-            echo "::set-output name=update_needed::false"
+            echo "::set-output name=sdk_update_needed::false"
           fi
+          
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Check if branch exists
-        id: check_branch
+      - name: Check if reaper flake input update is needed
+        id: check_for_reaper_flake_input_update
+        run: |
+          # Extract the full version number from the current flake.nix file
+          # and compare it to the latest version on reaper.fm download page.
+          # The version syntax in this case is 'XXX' with no '.' separation.
+          current_version=$(grep -oP 'reaper\K([0-9])+' ./flake.nix)
+          echo "Current version: $current_version"
+          raw_latest_version=${{ steps.get_version.outputs.latest_version }}
+          latest_version=${raw_latest_version//./} # remove the '.'
+
+          if [[ "$(printf '%s\n' "$current_version" "$latest_version" | sort -V | head -n 1)" != "$latest_version" ]]; then
+            echo "Update needed"
+            echo "::set-output name=reaper_flake_input_update_needed::true"
+          else
+            echo "No update needed"
+            echo "::set-output name=reaper_flake_input_update_needed::false"
+          fi
+          
+      - name: Check if reaper-sdk branch exists
+        id: check_reaper_sdk_branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -51,16 +76,72 @@ jobs:
           response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
           if [[ "$response" == "200" ]]; then
             echo "Branch $branch_name already exists"
-            echo "::set-output name=branch_exists::true"
+            echo "::set-output name=sdk_branch_exists::true"
           else
             echo "Branch $branch_name does not exist"
-            echo "::set-output name=branch_exists::false"
+            echo "::set-output name=sdk_branch_exists::false"
           fi
 
+      - name: Check if reascript-rs branch exists
+        id: check_reascript_rs_branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name="update-reaper-flake-input-${{ steps.get_version.outputs.latest_version }}"
+          api_url="https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/branches/${branch_name}"
+          response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
+          if [[ "$response" == "200" ]]; then
+            echo "Branch $branch_name already exists"
+            echo "::set-output name=rs_branch_exists::true"
+          else
+            echo "Branch $branch_name does not exist"
+            echo "::set-output name=rs_branch_exists::false"
+          fi
+
+        
+
+  update_reaper_tarball_url:
+    runs-on: ubuntu-latest
+    needs: check-reaper-version
+    if: ${{ needs.check-reaper-version.outputs.reaper_flake_input_update_needed == 'true' && needs.check-reaper-version.outputs.rs_branch_exists == 'false' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v17
+
+      - name: Update REAPER tarball URL
+        run: |
+          nix develop -c update_reaper_flake_input.sh
+          nix flake update reaper
+
+      - name: Commit and push changes
+        run: |
+          latest_version=${{ needs.check-reaper-version.outputs.latest_version }}
+          git config --global user.email "cloudscythelabs@gmail.com"
+          git config --global user.name "Cloud Scythe Labs"
+          git remote set-url origin "https://x-access-token:${{ secrets.REASCRIPT_PULL_REQUEST }}@github.com/Cloud-Scythe-Labs/reascript-rs.git"
+          git checkout -b update-reaper-flake-input-${latest_version}
+          git add -u
+          git commit -m "Update Reaper tarball URL ${latest_version}"
+          git push origin update-reaper-flake-input-${latest_version}
+          pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
+            -d '{
+                  "title": "Update Reaper tarball URL ${{ needs.check-reaper-version.outputs.latest_version }}",
+                  "body": "automated update of the reaper tarball URL.",
+                  "head": "update-reaper-flake-input-${{ needs.check-reaper-version.outputs.latest_version }}",
+                  "base": "master"
+                }' \
+            https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
+          if [[ "$pull_request_res" =~ "nothing to commit" ]]; then
+            exit 0
+          fi
+            
   generate-reaper-plugin-functions:
     runs-on: ubuntu-latest
     needs: check-reaper-version
-    if: ${{ needs.check-reaper-version.outputs.update_needed == 'true' && needs.check-reaper-version.outputs.branch_exists == 'false' }}
+    if: ${{ needs.check-reaper-version.outputs.sdk_update_needed == 'true' && needs.check-reaper-version.outputs.sdk_branch_exists == 'false' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
