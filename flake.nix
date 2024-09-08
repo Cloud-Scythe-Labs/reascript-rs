@@ -112,6 +112,7 @@
             devShells.default = craneLib.devShell {
               checks = self.checks.${system};
               packages = with pkgs; [
+                (pkgs.callPackage ./scripts/update_reaper_flake_input.nix { })
                 nil
                 nixpkgs-fmt
               ] ++ rustToolchain.complete;
