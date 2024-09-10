@@ -3,6 +3,7 @@ let
   echo = "${coreutils}/bin/echo";
   xdotool' = "${xdotool}/bin/xdotool";
   lua_script_name = "generate_reaper_plugin_functions.lua";
+
   genReaperPluginFunctionsBin = writeShellScriptBin "generate_reaper_plugin_functions.sh" ''
     DEVELOPER_WRITE_WINDOW_NAME="\[developer\] Write C\+\+ API functions header"
     GENERATE_REAPER_PLUGIN_FUNCTIONS_LUA_FILENAME="${lua_script_name}"
@@ -31,6 +32,8 @@ let
     }
     function add_generate_reaper_plugin_functions_lua() {
         reaper_window_id=$(${xdotool'} search --name "EVALUATION LICENSE")
+        ${echo} "Lua script path: $LUA_PLUGIN_PATH/$GENERATE_REAPER_PLUGIN_FUNCTIONS_LUA_FILENAME"
+
         if [[ -n "$reaper_window_id" ]]; then
             ${echo} "found reaper window with ID: $reaper_window_id"
         else
@@ -93,6 +96,8 @@ let
     text = ''
       -- Basic Reaper script for generating the reaper_plugin_functions.h C++ header file
       
+      reaper.ShowConsoleMsg("Running generate_reaper_plugin_functions.lua\n")
+
       -- Command ID for "[developer] Write C++ API functions header"
       local writeCppFunctionsHeader = 41064
       

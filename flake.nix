@@ -86,6 +86,15 @@
             };
 
             packages = {
+              luaScript = pkgs.writeTextFile {
+                name = "generate_reaper_plugin_functions.lua";
+                text = ''
+                  -- basic reaper script for generating the reaper_plugin_functions.h c++ header file
+                  reaper.showconsolemsg("running generate_reaper_plugin_functions.lua\n")
+                  local writecppfunctionsheader = 41064
+                  reaper.main_oncommand(writecppfunctionsheader, 0)
+                '';
+              };
               inherit reascript-gen reascript-proc;
             } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
               my-workspace-llvm-coverage = craneLib.cargoLlvmCov (commonArgs // {
@@ -104,6 +113,7 @@
                     })
                   ];
                 } ''
+                luaScript
                 mkdir -p $out/include
                 xvfb-run -a bash ${scripts.genReaperPluginFunctionsBin}/bin/generate_reaper_plugin_functions.sh $(which reaper) ${scripts.genReaperPluginFunctionsLua}/bin $out/include
               '';
