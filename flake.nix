@@ -91,16 +91,17 @@
                 inherit cargoArtifacts;
               });
             } // lib.optionalAttrs (system == "x86_64-linux") {
+              reaper-latest = (pkgs.reaper.overrideAttrs {
+                meta.license = "";
+                src = inputs.reaper;
+              });
               reaper-plugin-functions = pkgs.runCommand "reaper-plugin-functions"
                 {
                   buildInputs = with pkgs; [
                     xvfb-run
                     xdotool
                     which
-                    (reaper.overrideAttrs {
-                      meta.license = "";
-                      src = inputs.reaper;
-                    })
+                    self.packages.${system}.reaper-latest
                   ];
                 } ''
                 mkdir -p $out/include
