@@ -93,17 +93,8 @@ let
   '';
   genReaperPluginFunctionsLua = writeTextFile {
     name = "${lua_script_name}";
-    text = ''
-      -- Basic Reaper script for generating the reaper_plugin_functions.h C++ header file
-      
-      reaper.ShowConsoleMsg("Running generate_reaper_plugin_functions.lua\n")
-
-      -- Command ID for "[developer] Write C++ API functions header"
-      local writeCppFunctionsHeader = 41064
-      
-      -- Run the command
-      reaper.Main_OnCommand(writeCppFunctionsHeader, 0)
-    '';
+    text = builtins.readFile ../generate-reaper-plugin-functions/${lua_script_name};
+    destination = "/${lua_script_name}";
   };
 in
 {
