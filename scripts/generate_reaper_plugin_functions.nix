@@ -93,7 +93,7 @@ let
   '';
   genReaperPluginFunctionsLua = writeTextFile {
     name = "${lua_script_name}";
-    text = builtins.readFile ../generate-reaper-plugin-functions/${lua_script_name};
+    text = builtins.readFile ../scripts/${lua_script_name};
     destination = "/${lua_script_name}";
   };
 in
