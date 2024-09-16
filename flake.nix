@@ -87,10 +87,10 @@
 
             packages = {
               inherit reascript-gen reascript-proc;
-              inherit (scripts) genReaperPluginFunctionsLua genReaperPluginFunctionsBin;
             } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
               my-workspace-llvm-coverage = craneLib.cargoLlvmCov (commonArgs // {
                 inherit cargoArtifacts;
+                inherit (scripts) genReaperPluginFunctionsLua genReaperPluginFunctionsBin;
               });
             } // lib.optionalAttrs (system == "x86_64-linux") {
               reaper-plugin-functions = pkgs.runCommand "reaper-plugin-functions"
