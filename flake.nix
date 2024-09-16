@@ -55,6 +55,7 @@
                 crate
               ];
             };
+            scripts = pkgs.callPackage ./scripts/generate_reaper_plugin_functions.nix { };
             reascript-gen = craneLib.buildPackage (individualCrateArgs // {
               pname = "reascript-gen";
               cargoExtraArgs = "-p reascript-gen";
@@ -89,6 +90,7 @@
             } // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
               my-workspace-llvm-coverage = craneLib.cargoLlvmCov (commonArgs // {
                 inherit cargoArtifacts;
+                inherit (scripts) genReaperPluginFunctionsLua genReaperPluginFunctionsBin;
               });
             } // lib.optionalAttrs (system == "x86_64-linux") {
               reaper-latest = (pkgs.reaper.overrideAttrs {
@@ -105,7 +107,7 @@
                   ];
                 } ''
                 mkdir -p $out/include
-                xvfb-run -a bash ${./generate-reaper-plugin-functions/run.sh} $(which reaper) ${./generate-reaper-plugin-functions} $out/include
+                xvfb-run -a bash ${scripts.genReaperPluginFunctionsBin}/bin/generate_reaper_plugin_functions.sh $(which reaper) ${scripts.genReaperPluginFunctionsLua} $out/include
               '';
             };
 
