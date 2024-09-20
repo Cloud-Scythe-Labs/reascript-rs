@@ -1,0 +1,72 @@
+name: Update Submodules
+
+on:
+  workflow_dispatch: # Allow manual triggering
+  schedule:
+    - cron: '0 0 * * *'  # Execute at midnight every day
+
+jobs:
+  check_update_submodule_branch:
+    runs-on: ubuntu-latest
+    outputs:
+      submodule_branch_exists: ${{ steps.check_update_submodule_branch.outputs.submodule_branch_exists }}
+    steps:
+      - name: Checkout respository
+        uses: actions/checkout@v4
+
+      - name: Check if update-submodule branch exists
+        id: check_update_submodule_branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name="update-submodules"
+          api_url="https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/branches/${branch_name}"
+                    response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
+          if [[ "$response" == "200" ]]; then
+            echo "Branch $branch_name already exists"
+            echo "::set-output name=submodule_branch_exists::true"
+          else
+            echo "Branch $branch_name does not exist"
+            echo "::set-output name=submodule_branch_exists::false"
+          fi
+      
+  update_submodule:
+    runs-on: ubuntu-latest
+    needs: check_update_submodule_branch
+    if: ${{ needs.check_update_submodule_branch.outputs.submodule_branch_exists == 'false' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true # Make sure to check out the sub-module
+
+      - name: Update submodule
+        run: |
+          git submodule update --init --recursive
+          git submodule update --remote --recursive
+
+      - name: Check if changes were made and commit if found
+        id: check_and_commit_changes
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No changes were made."
+            exit 0
+          else
+            git config --global user.email "cloudscythelabs@gmail.com"
+            git config --global user.name "Cloud Scythe Labs"
+            git remote set-url origin "https://x-access-token:${{ secrets.REASCRIPT_PULL_REQUEST }}@github.com/Cloud-Scythe-Labs/reascript-rs.git"
+            git checkout -b update-submodules
+            git add .
+            git commit -m "Update Submodules"
+            git push origin update-submodules
+            pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
+              -d '{
+                    "title": "Update Submodules",
+                    "body": "automated update of the reaper submodules.",
+                    "head": "update-submodules",
+                    "base": "master"
+                  }' \
+              https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
+            if [[ "$pull_request_res" =~ "nothing to commit" ]]; then
+              exit 0
+            fi
