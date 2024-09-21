@@ -59,14 +59,19 @@ jobs:
             git add .
             git commit -m "Update Submodules"
             git push origin update-submodules
-            pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
-              -d '{
-                    "title": "Update Submodules",
-                    "body": "automated update of the reaper submodules.",
-                    "head": "update-submodules",
-                    "base": "master"
-                  }' \
-              https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
-            if [[ "$pull_request_res" =~ "nothing to commit" ]]; then
-              exit 0
-            fi
+          fi
+
+      - name: Create pull request
+        run: |
+          pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
+            -d '{
+                  "title": "Update Submodules",
+                  "body": "automated update of the reaper submodules.",
+                  "head": "update-submodules",
+                  "base": "master"
+                }' \
+            https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
+          echo "$pull_request_res"
+          if [[ "$pull_request_res" =~ "nothing to commit" ]]; then
+            exit 0
+          fi
