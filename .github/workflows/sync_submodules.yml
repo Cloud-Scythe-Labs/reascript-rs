@@ -49,27 +49,24 @@ jobs:
           git submodule update --init --recursive
           git submodule update --remote --recursive
 
-      - name: Check if changes were made and commit if found
-        id: check_and_commit_changes
+      - name: Check if changes were made and create pull request if found
+        id: check_and_create_pull_request
         run: |
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "No changes were made."
+          git config --global user.email "cloudscythelabs@gmail.com"
+          git config --global user.name "Cloud Scythe Labs"
+          git remote set-url origin "https://x-access-token:${{ secrets.REASCRIPT_PULL_REQUEST }}@github.com/Cloud-Scythe-Labs/reascript-rs.git"
+          git checkout -b update-submodules
+          git add -u
+          git commit -m "Update Submodules"
+          git push origin update-submodules
+          pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
+            -d '{
+                  "title": "Update Submodules",
+                  "body": "automated update of the reaper submodules.",
+                  "head": "update-submodules",
+                  "base": "master"
+                }' \
+            https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
+          if [[ "$pull_request_res" =~ "nothing to commit" ]]; then
             exit 0
-          else
-            git config --global user.email "cloudscythelabs@gmail.com"
-            git config --global user.name "Cloud Scythe Labs"
-            git remote set-url origin "https://x-access-token:${{ secrets.REASCRIPT_PULL_REQUEST }}@github.com/Cloud-Scythe-Labs/reascript-rs.git"
-            git checkout -b update-submodules
-            git add -u
-            git commit -m "Update Submodules"
-            git push origin update-submodules
-            pull_request_res=$(curl -X POST -H "Authorization: token ${{ secrets.REASCRIPT_PULL_REQUEST }}" \
-              -d '{
-                    "title": "Update Submodules",
-                    "body": "automated update of the reaper submodules.",
-                    "head": "update-submodules",
-                    "base": "master"
-                  }' \
-              https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/pulls)
-            echo "$pull_request_res"
           fi
