@@ -8,8 +8,8 @@ on:
   pull_request:
     branches:
       master
-  permissions:
-    contents: write
+permissions:
+  contents: write
 
 jobs:
   check_update_submodule_branch:
