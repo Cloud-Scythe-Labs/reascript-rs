@@ -8,6 +8,8 @@ on:
   pull_request:
     branches:
       master
+  permissions:
+    contents: write
 
 jobs:
   check_update_submodule_branch:
@@ -25,7 +27,7 @@ jobs:
         run: |
           branch_name="update-submodules"
           api_url="https://api.github.com/repos/Cloud-Scythe-Labs/reascript-rs/branches/${branch_name}"
-                    response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
+          response=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: token $GITHUB_TOKEN" "$api_url")
           if [[ "$response" == "200" ]]; then
             echo "Branch $branch_name already exists"
             echo "::set-output name=submodule_branch_exists::true"
