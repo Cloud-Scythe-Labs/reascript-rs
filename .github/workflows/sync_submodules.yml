@@ -1,13 +1,9 @@
 name: Update Submodules
 
-# on:
-#   workflow_dispatch: # Allow manual triggering
-#   schedule:
-#     - cron: '0 0 * * *'  # Execute at midnight every day
 on:
-  pull_request:
-    branches:
-      master
+  workflow_dispatch: # Allow manual triggering
+  schedule:
+    - cron: '0 0 * * *'  # Execute at midnight every day
 permissions:
   contents: write
 
