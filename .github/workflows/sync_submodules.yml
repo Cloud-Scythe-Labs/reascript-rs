@@ -52,6 +52,7 @@ jobs:
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes were made."
+            exit 0
           else
             git config --global user.email "cloudscythelabs@gmail.com"
             git config --global user.name "Cloud Scythe Labs"
