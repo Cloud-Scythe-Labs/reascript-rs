@@ -132,14 +132,14 @@
     "reaper": {
       "flake": false,
       "locked": {
-        "lastModified": 1724670340,
-        "narHash": "sha256-yZPYxquik6xJq55t0WDrYx2V/lU/Zu96aOdBHA9IYmA=",
+        "lastModified": 1727975653,
+        "narHash": "sha256-y6zqEi7hb9yQDp4/m9HfPl42/cyMyRR3oOdUrJvaFco=",
         "type": "tarball",
-        "url": "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz"
+        "url": "https://www.reaper.fm/files/7.x/reaper723_linux_x86_64.tar.xz"
       },
       "original": {
         "type": "tarball",
-        "url": "https://www.reaper.fm/files/7.x/reaper722_linux_x86_64.tar.xz"
+        "url": "https://www.reaper.fm/files/7.x/reaper723_linux_x86_64.tar.xz"
       }
     },
     "root": {
