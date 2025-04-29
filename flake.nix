@@ -1,7 +1,7 @@
 {
   inputs = {
     reaper = {
-      url = "https://www.reaper.fm/files/7.x/reaper736_linux_x86_64.tar.xz";
+      url = "https://www.reaper.fm/files/7.x/reaper737_linux_x86_64.tar.xz";
       flake = false;
     };
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
