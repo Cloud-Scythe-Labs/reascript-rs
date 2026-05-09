@@ -240,26 +240,34 @@ impl TakeBuilder {
 #[derive(Debug, Clone)]
 pub struct Source {
     file_path: Option<PathBuf>,
+    relative_path: Option<PathBuf>,
     r#type: String,
 }
 impl Source {
-    pub fn new(file_path: Option<PathBuf>, source_type: String) -> Self {
+    pub fn new(file_path: Option<PathBuf>, relative_path: Option<PathBuf>, source_type: String) -> Self {
         Self {
-            r#type: source_type,
             file_path,
+            relative_path,
+            r#type: source_type,
         }
     }
 
-    /// The file path of the source file for some [`Take`]
+    /// The file path of the source file for some [`Take`].
     pub fn file_path(&self) -> Option<&PathBuf> {
         self.file_path.as_ref()
     }
 
-    /// The file name of the source file for some [`Take`]
+    /// The file name of the source file for some [`Take`].
     pub fn file_name(&self) -> Option<&std::ffi::OsStr> {
         self.file_path
             .as_ref()
             .and_then(|file_path| file_path.file_name())
+    }
+
+    /// The file path of the source file for some [`Take`]
+    /// relative to the REAPER session file.
+    pub fn relative_path(&self) -> Option<&PathBuf> {
+        self.relative_path.as_ref()
     }
 
     /// The type of the source file, eg. MIDI, WAV, etc.
@@ -270,9 +278,15 @@ impl Source {
 #[derive(Default)]
 pub struct SourceBuilder {
     file_path: Option<PathBuf>,
+    relative_path: Option<PathBuf>,
     r#type: Option<String>,
 }
 impl SourceBuilder {
+    pub fn relative_path(self, relative_path: Option<PathBuf>) -> Self {
+        let mut buf = self;
+        buf.relative_path = relative_path;
+        buf
+    }
     pub fn file_path(self, file_path: Option<PathBuf>) -> Self {
         let mut buf = self;
         buf.file_path = file_path;
@@ -285,7 +299,7 @@ impl SourceBuilder {
     }
     pub fn build(self) -> Option<Source> {
         self.r#type
-            .map(|source_type| Source::new(self.file_path, source_type))
+            .map(|source_type| Source::new(self.relative_path, self.file_path, source_type))
     }
 }
 
@@ -340,11 +354,12 @@ pub fn get_track_items(reaper: &Reaper, media_track: reaper_medium::MediaTrack) 
                             TakeBuilder::default()
                                 .name(get_take_name(reaper, active_take))
                                 .source(
-                                    get_media_item_take_source_path_and_type(reaper, active_take)
-                                        .and_then(|(file_path, source_type)| {
+                                    get_media_item_take_source(reaper, active_take)
+                                        .and_then(|(file_path, relative_path, source_type)| {
                                             SourceBuilder::default()
                                                 .file_path(file_path)
-                                                .source_type(Some(source_type))
+                                                .relative_path(relative_path)
+                                                .source_type(source_type)
                                                 .build()
                                         }),
                                 )
@@ -369,25 +384,38 @@ pub fn get_take_name(
         .ok()
 }
 
-/// Get the `reaper_medium::MediaItemTake` source path as a `std::path::PathBuf`.
-pub fn get_media_item_take_source_path_and_type(
+/// Get the `reaper_medium::MediaItemTake` source used to build a [`Source`].
+pub fn get_media_item_take_source(
     reaper: &Reaper,
     media_item_take: reaper_medium::MediaItemTake,
-) -> Option<(Option<PathBuf>, String)> {
+) -> Option<(Option<PathBuf>, Option<PathBuf>, Option<String>)> {
     unsafe { reaper.get_media_item_take_source(media_item_take) }.map(|pcm_source| {
         let raw_source_ptr = pcm_source.as_ptr();
-        (
-            unsafe { raw_source_ptr.as_ref() }.and_then(|raw_source_ptr| {
-                BorrowedPcmSource::from_raw(raw_source_ptr)
-                    .get_file_name(|file| file.map(|file| file.to_path_buf().into_std_path_buf()))
-            }),
-            util::with_string_buffer(MAX_FILE_PATH_BUFFER_LEN, |buffer, max_size| unsafe {
-                reaper
-                    .low()
-                    .GetMediaSourceType(raw_source_ptr, buffer, max_size)
+        let file_path = unsafe { raw_source_ptr.as_ref() }.and_then(|raw_source_ptr| {
+            BorrowedPcmSource::from_raw(raw_source_ptr)
+                .get_file_name(|file| file.map(|file| file.to_path_buf().into_std_path_buf()))
+        });
+        let relative_path = file_path.as_ref().and_then(|path| {
+            std::ffi::CString::new(path.to_string_lossy().as_bytes()).ok().and_then(|path_cstring| {
+                let relative_path = util::with_string_buffer(MAX_FILE_PATH_BUFFER_LEN, |buffer, max_size| unsafe {
+                    reaper.low().relative_fn(path_cstring.as_ptr(), buffer, max_size);
+                })
+                .0
+                .into_string();
+                (!relative_path.is_empty()).then_some(PathBuf::from(relative_path))
             })
-            .0
-            .into_string(),
+        });
+        let source_type = util::with_string_buffer(MAX_FILE_PATH_BUFFER_LEN, |buffer, max_size| unsafe {
+            reaper
+                .low()
+                .GetMediaSourceType(raw_source_ptr, buffer, max_size)
+        })
+        .0
+        .into_string();
+        (
+            file_path,
+            relative_path,
+            (!source_type.is_empty()).then_some(source_type),
         )
     })
 }
@@ -403,11 +431,12 @@ pub fn get_media_item_takes(reaper: &Reaper, media_item: reaper_medium::MediaIte
                 TakeBuilder::default()
                     .name(get_take_name(reaper, media_item_take))
                     .source(
-                        get_media_item_take_source_path_and_type(reaper, media_item_take).and_then(
-                            |(file_path, source_type)| {
+                        get_media_item_take_source(reaper, media_item_take).and_then(
+                            |(file_path, relative_path, source_type)| {
                                 SourceBuilder::default()
                                     .file_path(file_path)
-                                    .source_type(Some(source_type))
+                                    .relative_path(relative_path)
+                                    .source_type(source_type)
                                     .build()
                             },
                         ),
