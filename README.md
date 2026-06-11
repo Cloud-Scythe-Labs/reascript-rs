@@ -23,6 +23,9 @@ Features are likely to be added periodically as the project develops, though pul
 
 To use the crate in your REAPER extension, add it to your `Cargo.toml`:
 
+> [!IMPORTANT]
+> `reascript` relies on an internal version of `reaper-rs` which may not always be in sync with master.
+
 ```toml
 [dependencies]
 reascript = { git = "https://github.com/Cloud-Scythe-Labs/reascript-rs.git" }
