@@ -4,8 +4,10 @@ use reaper_medium::{
     BorrowedPcmSource, EnumProjectsResult, MediaItemTake, ProjectContext, ProjectRef, Reaper,
 };
 
-/// This is the max size for a file path length, anything larger always returns None
-pub const MAX_FILE_PATH_BUFFER_LEN: u32 = 256;
+/// The size of the buffers REAPER writes file paths into, NUL included. A longer path doesn't
+/// fit. 4096 bytes is Linux's `PATH_MAX`, four times macOS's, and far more than Windows' classic
+/// `MAX_PATH` of 260 characters.
+pub const MAX_FILE_PATH_BUFFER_LEN: u32 = 4096;
 
 /// The REAPER session file
 #[derive(Debug, Clone)]
