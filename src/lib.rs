@@ -54,21 +54,21 @@ pub struct Project {
 impl Project {
     /// Load information for the top level project for attribute selection
     pub fn load(reaper: &Reaper) -> Option<Self> {
-        if let Some(current_project) = get_current_project(reaper) {
-            if let Some(rpp_filepath) = get_rpp_file_path(&current_project) {
-                let context = ProjectContext::Proj(current_project.project);
-                let file = RppFile::new(rpp_filepath);
+        if let Some(current_project) = get_current_project(reaper)
+            && let Some(rpp_filepath) = get_rpp_file_path(&current_project)
+        {
+            let context = ProjectContext::Proj(current_project.project);
+            let file = RppFile::new(rpp_filepath);
 
-                return Some(Self {
-                    name: file.name()?,
-                    raw: current_project.project,
-                    media_path: reaper
-                        .get_project_path_ex(context, MAX_FILE_PATH_BUFFER_LEN)
-                        .into_std_path_buf(),
-                    file,
-                    tracks: get_tracks_for_project(reaper, context),
-                });
-            }
+            return Some(Self {
+                name: file.name()?,
+                raw: current_project.project,
+                media_path: reaper
+                    .get_project_path_ex(context, MAX_FILE_PATH_BUFFER_LEN)
+                    .into_std_path_buf(),
+                file,
+                tracks: get_tracks_for_project(reaper, context),
+            });
         }
         None
     }
