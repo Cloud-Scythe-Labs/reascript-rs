@@ -1,7 +1,8 @@
 use std::{ffi::CString, path::PathBuf};
 
 use reaper_medium::{
-    BorrowedPcmSource, EnumProjectsResult, MediaItemTake, ProjectContext, ProjectRef, Reaper,
+    BorrowedPcmSource, EnumProjectsResult, MediaItemTake, ProjectContext, ProjectRef, ReaProject,
+    Reaper,
 };
 
 /// The size of the buffers REAPER writes file paths into, NUL included. A longer path doesn't
@@ -54,21 +55,21 @@ pub struct Project {
 impl Project {
     /// Load information for the top level project for attribute selection
     pub fn load(reaper: &Reaper) -> Option<Self> {
-        if let Some(current_project) = get_current_project(reaper) {
-            if let Some(rpp_filepath) = get_rpp_file_path(&current_project) {
-                let context = ProjectContext::Proj(current_project.project);
-                let file = RppFile::new(rpp_filepath);
+        if let Some(current_project) = get_current_project(reaper)
+            && let Some(rpp_filepath) = get_rpp_file_path(&current_project)
+        {
+            let context = ProjectContext::Proj(current_project.project);
+            let file = RppFile::new(rpp_filepath);
 
-                return Some(Self {
-                    name: file.name()?,
-                    raw: current_project.project,
-                    media_path: reaper
-                        .get_project_path_ex(context, MAX_FILE_PATH_BUFFER_LEN)
-                        .into_std_path_buf(),
-                    file,
-                    tracks: get_tracks_for_project(reaper, context),
-                });
-            }
+            return Some(Self {
+                name: file.name()?,
+                raw: current_project.project,
+                media_path: reaper
+                    .get_project_path_ex(context, MAX_FILE_PATH_BUFFER_LEN)
+                    .into_std_path_buf(),
+                file,
+                tracks: get_tracks_for_project(reaper, context),
+            });
         }
         None
     }
@@ -437,35 +438,38 @@ pub fn get_modtime(filepath: &PathBuf) -> Option<chrono::DateTime<chrono::Utc>> 
     chrono::DateTime::from_timestamp(timestamp.unix_seconds(), timestamp.nanoseconds())
 }
 
-/// Get the value previously associated with this extname and key, the last time the project was saved.
+/// Get the value associated with this extname and key in the project's extension state: the last
+/// one set with [`set_proj_ext_state`], or the one loaded from the session file. `None` if there
+/// is none, it's empty or it isn't UTF-8. Only values shorter than `buffer_size` bytes are read
+/// whole.
 pub fn get_proj_ext_state(
     reaper: &Reaper,
-    project: &Project,
+    project: ReaProject,
     extname: &str,
     key: &str,
     buffer_size: u32,
 ) -> Option<String> {
     let extname = CString::new(extname).ok()?;
     let key = CString::new(key).ok()?;
-    let (reaper_string, _) = util::with_string_buffer(buffer_size, |buffer, max_size| unsafe {
+    let (value, _) = util::with_string_buffer_cstring(buffer_size, |buffer, max_size| unsafe {
         reaper.low().GetProjExtState(
-            project.raw().as_ptr(),
+            project.as_ptr(),
             extname.as_ptr(),
             key.as_ptr(),
             buffer,
             max_size,
         )
     });
-    Some(reaper_string.into_string())
+    value.into_string().ok().filter(|value| !value.is_empty())
 }
 
 /// Save a key/value pair for a specific extension, to be restored the next time this specific project is loaded.
 /// Typically extname will be the name of a reascript or extension section. If key is NULL or "", all extended
 /// data for that extname will be deleted. If val is NULL or "", the data previously associated with that key
-/// will be deleted. Returns the size of the state for this extname.
+/// will be deleted. Returns the size of the state for this extname, or `None` if a string contains a NUL byte.
 pub fn set_proj_ext_state(
     reaper: &Reaper,
-    project: &Project,
+    project: ReaProject,
     extname: &str,
     key: &str,
     value: &str,
@@ -476,12 +480,63 @@ pub fn set_proj_ext_state(
 
     Some(unsafe {
         reaper.low().SetProjExtState(
-            project.raw().as_ptr(),
+            project.as_ptr(),
             extname.as_ptr(),
             key.as_ptr(),
             value.as_ptr(),
         )
     })
+}
+
+/// Returns true if there exists an extended state value for a specific section and key, i.e. in
+/// REAPER's global extension state. False if a string contains a NUL byte.
+pub fn has_ext_state(reaper: &Reaper, section: &str, key: &str) -> bool {
+    let (Ok(section), Ok(key)) = (CString::new(section), CString::new(key)) else {
+        return false;
+    };
+    unsafe { reaper.low().HasExtState(section.as_ptr(), key.as_ptr()) }
+}
+
+/// Set the extended state value for a specific section and key, i.e. in REAPER's global extension
+/// state. `persist` means the value should be stored (in `reaper-extstate.ini`) and reloaded the
+/// next time REAPER is opened. Does nothing if a string contains a NUL byte.
+pub fn set_ext_state(reaper: &Reaper, section: &str, key: &str, value: &str, persist: bool) {
+    let (Ok(section), Ok(key), Ok(value)) = (
+        CString::new(section),
+        CString::new(key),
+        CString::new(value),
+    ) else {
+        return;
+    };
+    unsafe {
+        reaper
+            .low()
+            .SetExtState(section.as_ptr(), key.as_ptr(), value.as_ptr(), persist);
+    }
+}
+
+/// Delete the extended state value for a specific section and key, i.e. from REAPER's global
+/// extension state. `persist` means the value should remain deleted the next time REAPER is
+/// opened. Does nothing if a string contains a NUL byte.
+pub fn delete_ext_state(reaper: &Reaper, section: &str, key: &str, persist: bool) {
+    let (Ok(section), Ok(key)) = (CString::new(section), CString::new(key)) else {
+        return;
+    };
+    unsafe {
+        reaper
+            .low()
+            .DeleteExtState(section.as_ptr(), key.as_ptr(), persist);
+    }
+}
+
+/// Save the project, like REAPER's "Save project" action: a project that was never saved, or any
+/// project if `force_save_as`, asks the user where to save it.
+pub fn save_project(reaper: &Reaper, project: ReaProject, force_save_as: bool) {
+    unsafe {
+        reaper
+            .low()
+            .Main_SaveProject(project.as_ptr(), force_save_as)
+    }
 }
 
 mod util {
